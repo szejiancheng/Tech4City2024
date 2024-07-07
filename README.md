@@ -35,7 +35,7 @@ Create a repository with the following structure:
 
 Dockerfile            # Provide a Dockerfile to containerize the application.
                       # The application should be accessible on port 8000.
-                      #
+                      
 submission.md         # Provide your team name and other necessary information for the repository as deemed necessary
 ```
 
