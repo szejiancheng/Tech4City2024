@@ -80,7 +80,7 @@ cd Tech4City2024
 
 Set upstream:
 ```
-git remote add upstream git@github.com:forkwell-io/fch-virus-combat
+git remote add upstream git@github.com:ej-hw/Tech4City2024
 ```
 
 ...and start Hacking!!
