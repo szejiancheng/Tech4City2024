@@ -46,8 +46,11 @@ submission.md         # Provide your team name and other necessary information f
 - Ability to review historical data submission and result
 
 #### Backend:
-- Proper implementation of API endpoints.
+- Proper implementation of API endpoints and adherence to REST principles.
 - Effective data storage and retrieval using local database.
+- Input validation and error handling.
+- Database schema design and usage.
+- API endpoints documentation using OpenAPI (Swagger) or equivalent.
   
 #### AI Element:
 - Use of appropriate techniques for AI processing.
