@@ -1,10 +1,15 @@
 # Tech4City2024 - Entry Coding Challenge
+![Tech4CityBanner](https://github.com/ej-hw/Tech4City2024/blob/main/Tech4City2024Banner.png?raw=true)
+
 [Fork](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) now to participate!
 
 ## About
-Placeholder
 
-## Challenge:
+The annual Huawei Tech4City Competition presents a great opportunity for you to embark on a digital journey towards creating a more inclusive and sustainable Singapore. This competition will equip you with the tools you need to build and improve your prototypes, and turn your creative ideas and solutions into reality.
+
+Find out more about the Huawei Tech4City 2024 competition on the [official website](http://tech4city.sg/2024)
+
+## Entry Challenge:
 Create an AI web application that allows user to input data, perform AI processing on the input, and displays the result. The application should also store past inputs and results in a lightweight local database, which can be viewed later on the frontend. Application needs to be runable using a 4vCPU, 16 GB Ram without GPU environment. 
 
 Participants can choose one of the following AI use cases:
