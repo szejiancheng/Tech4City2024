@@ -94,4 +94,7 @@ components:
         confidence_score:
           type: number
           format: float
+        result_timestamp: 
+          type: string
+          format: date-time
 
