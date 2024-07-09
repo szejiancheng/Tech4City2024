@@ -22,7 +22,7 @@ paths:
 
   /images/{imageId}:
     get:
-      summary:
+      summary: Get image by ID
       parameters:
         - name: imageId
           in: path
@@ -37,12 +37,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'example schema'
+                $ref: 'placeholder_schema'
         '404':
           description: Image not found
 
   /infer:
-    summary: Running inference with model
+    post:
+      summary: Running inference with model
       requestBody: 
         description: Image to be classified
         required: true
@@ -54,6 +55,6 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'example schema'
+                $ref: 'placeholder_schema'
         '400':
           description: Error with payload or model
