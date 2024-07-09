@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Tech4City Entry Coding Challenge - Cloud Control
+  version: 1.0.0
+servers: 
+  - url: 'https://api.example.com'
+    description: 'placeholder'
+  - url: 'https://api.example.com'
+    description: 'placeholder 2'
+paths:
+  /images:
+    post:
+      summary: Uploading an image
+      requestBody: 
+        description: Image to be classified
+        required: true
+        content: 
+          application/octet-stream: {}
+      responses:
+        '200': 
+          description: Successfully uploaded
+
+  /images/{imageId}:
+    get:
+      summary:
+      parameters:
+        - name: imageId
+          in: path
+          description: Get image by ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: 'example schema'
+        '404':
+          description: Image not found
+
+  /infer:
+    summary: Running inference with model
+      requestBody: 
+        description: Image to be classified
+        required: true
+        content: 
+          application/octet-stream: {}
+      responses:
+        '200': 
+          description: Successful inference
+          content:
+            application/json:
+              schema:
+                $ref: 'example schema'
+        '400':
+          description: Error with payload or model
