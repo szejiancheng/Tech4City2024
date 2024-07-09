@@ -11,8 +11,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS Images (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filepath TEXT NOT NULL,
-            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            classification_result TEXT
+            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ''')
     print('Images table created!')
@@ -33,6 +32,7 @@ def init_db():
             image_id INTEGER,
             label_id INTEGER,
             confidence_score REAL,
+            result_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (image_id) REFERENCES Images (id),
             FOREIGN KEY (label_id) REFERENCES Labels (id)
         );
