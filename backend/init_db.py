@@ -12,7 +12,6 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filepath TEXT NOT NULL,
             upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            response TEXT, -- JSON data as text
             classification_result TEXT
         );
     ''')
