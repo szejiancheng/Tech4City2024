@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nomsters Web</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="assets/logo/logo_white.png" type="image/png">
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="background-container">
+                <img id="background" class="background" src="assets/backgrounds/beach.png" alt="Background">
+                <div id="fade-overlay" class="fade-overlay"></div>
+            </div>
+            <div class="diary-button">
+                <img src="assets/icons/diary.png" class="diary-icon" alt="Diary">
+            </div>
+            <button id="menu-button" class="menu-button">menu</button>
+            <div class="content">
+                <img id="pet" src="assets/pets/frogbro.gif" class="pet" alt="Pet">
+                <button id="feed-button" class="button">upload</button>
+            </div>
+            <div class="background-controls">
+                <button id="prev-bg-button" class="background-button">
+                    <img src="assets/icons/leftarrow.png" class="rotated-180" alt="Previous">
+                </button>
+                <button id="next-bg-button" class="background-button">
+                    <img src="assets/icons/rightarrow.png" alt="Next">
+                </button>
+            </div>
+            <div class="music-button-container">
+                <img id="music-button" src="assets/icons/music.png" class="music-icon" alt="Music">
+            </div>
+        </div>
+    </div>
+
+    <div id="play-overlay" class="play-overlay">
+        <button id="play-button" class="play-button">
+            <img src="assets/icons/playbutton.png" alt="Play">
+        </button>
+    </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Upload a photo</h2>
+            <input type="file" id="file-input" accept="image/*">
+            <div id="preview-container" class="drag-and-drop">
+                <label for="file-input">
+                    <img id="preview-image" src="assets/icons/camera.png" alt="Preview" class="preview-image">
+                    <p>Drag & Drop your image here or click to upload</p>
+                </label>
+            </div>
+            <label for="file-input" class="custom-file-upload">
+                Choose File
+            </label>
+        </div>
+    </div>
+
+    <audio id="background-music" loop>
+        <source src="assets/music/beach.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
