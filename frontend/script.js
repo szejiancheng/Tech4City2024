@@ -126,34 +126,28 @@ document.addEventListener('DOMContentLoaded', function () {
         updateBackgroundAndMusic();
     });
 
-    // Initialize audio context and play audio on play button click
     playButton.addEventListener('click', function () {
         initializeAudio();
         playAudio();
         playOverlay.style.display = 'none';
     });
 
-    // Add event listener to toggle music
     musicButton.addEventListener('click', toggleMusic);
 
-    // Add event listener for the upload button to open the modal
     feedButton.addEventListener('click', function () {
         modal.style.display = 'block';
     });
 
-    // Add event listener to close the modal
     closeModalButton.addEventListener('click', function () {
         modal.style.display = 'none';
     });
 
-    // Close the modal when clicking outside of it
     window.addEventListener('click', function (event) {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
 
-    // Add event listener to handle file selection and preview
     fileInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         handleFile(file);
@@ -165,25 +159,60 @@ document.addEventListener('DOMContentLoaded', function () {
             reader.onload = function (e) {
                 previewImage.src = e.target.result;
                 previewImage.classList.add('has-image');
-                // Remove label wrapping to make the uploaded image non-clickable
                 const label = document.querySelector('#preview-container label');
                 if (label) {
                     label.replaceWith(...label.childNodes);
                 }
+                addAnalyseButton();
+                addClearButton();
             };
             reader.readAsDataURL(file);
         } else {
-            previewImage.src = 'assets/icons/camera.png';
-            previewImage.classList.remove('has-image');
-            // Wrap the preview image in a label to make it clickable again
-            const label = document.createElement('label');
-            label.htmlFor = 'file-input';
-            label.appendChild(previewImage);
-            previewContainer.appendChild(label);
+            clearImage();
         }
     };
 
-    // Drag-and-drop functionality
+    const addAnalyseButton = () => {
+        const analyseButton = document.createElement('button');
+        analyseButton.classList.add('analyse-button');
+        analyseButton.textContent = 'Analyse';
+        previewContainer.appendChild(analyseButton);
+    };
+
+    const addClearButton = () => {
+        const clearButton = document.createElement('button');
+        clearButton.classList.add('clear-button');
+        clearButton.textContent = 'Clear Image';
+        clearButton.addEventListener('click', clearImage);
+        previewContainer.appendChild(clearButton);
+    };
+
+    const clearImage = () => {
+        previewImage.src = 'assets/icons/camera.png';
+        previewImage.classList.remove('has-image');
+        const label = document.createElement('label');
+        label.htmlFor = 'file-input';
+        label.appendChild(previewImage);
+        previewContainer.appendChild(label);
+        removeAnalyseButton();
+        removeClearButton();
+    };
+
+    const removeAnalyseButton = () => {
+        const analyseButton = document.querySelector('.analyse-button');
+        if (analyseButton) {
+            analyseButton.remove();
+        }
+    };
+
+    const removeClearButton = () => {
+        const clearButton = document.querySelector('.clear-button');
+        if (clearButton) {
+            clearButton.remove();
+        }
+    };
+
+    // Drag drop functionality
     previewContainer.addEventListener('dragover', function (e) {
         e.preventDefault();
         previewContainer.classList.add('dragging');
@@ -200,7 +229,6 @@ document.addEventListener('DOMContentLoaded', function () {
         handleFile(file);
     });
 
-    // Add keyboard event listener for arrow keys
     document.addEventListener('keydown', async function (event) {
         if (event.key === 'ArrowLeft') {
             currentBgIndex = (currentBgIndex - 1 + backgrounds.length) % backgrounds.length;
@@ -213,6 +241,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Load the first background and music initially
     updateBackgroundAndMusic();
 });
