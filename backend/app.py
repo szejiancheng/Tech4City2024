@@ -36,16 +36,58 @@ def store_in_database(data, result):
     ''', rows)
     result_id = cursor.lastrowid
 
+    connection.close()
+
     return image_id, result_id
 
-def fetch_all_results():
-    # Fetch all results from the database
-    return [{'input': 'input1', 'result': 'result1'}, {'input': 'input2', 'result': 'result2'}]
+
+# Fetch results from the database
+def fetch_results(filepath = None):
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    # Join tables, filtering if necessary
+    sql = '''
+        SELECT 
+            Images.upload_date, 
+            Labels.label_name, 
+            Results.confidence_score
+        FROM 
+            Images
+        JOIN 
+            Results ON Images.image_id = Results.image_id
+        JOIN 
+            Labels ON Results.label_id = Labels.label_id
+    '''
+    if filepath:
+        sql += f'''
+            WHERE Images.filepath = {filepath}
+        '''
+    cursor.execute(sql)
+    results = cursor.fetchall()
+    connection.close()
+
+    # Process table into output
+    ret_output = {}
+    if results:
+        for result in results:
+            if result['filepath'] not in ret_output:
+                ret_output[result['filepath']] = {
+                    'timestamp': result['upload_date'],
+                    'predictions': []
+                }
+            else:
+                ret_output[result['filepath']]['predictions'].append({
+                    'label_name': result['label_name'],
+                    'confidence_score': result['confidence_score']
+                })
+
+    return ret_output
 
 
-@app.route('/infer', methods=['POST'])
+@app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
-def infer():
+def analyze():
     # Access the raw data (file path) from the request
     data = request.data
     # Check if data is present
@@ -55,6 +97,8 @@ def infer():
 
     # Perform AI processing on the input data
     result = perform_ai_processing(data)
+    if not result:
+        return jsonify({'error': 'failed to make inference'}), 400
 
     # Store the input and result in the database
     image_id, result_id = store_in_database(data, result)
@@ -66,7 +110,15 @@ def infer():
 
 # GET /results: Retrieves all stored inputs and their results from the database.
 @app.route('/results', methods=['GET'])  
-def get_results():
+def get_all_results():
     # Fetch all results from the database
-    results = fetch_all_results()
+    results = fetch_results()
+    return jsonify(results), 200
+
+
+# GET /results: Retrieves results of specified image from the database.
+@app.route('/results/<filepath>', methods=['GET'])  
+def get_results(filepath):
+    # Fetch relevant results from the database
+    results = fetch_results(filepath)
     return jsonify(results), 200
