@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('upload-modal');
     const closeModalButton = document.querySelector('.close-button');
     const fileInput = document.getElementById('file-input');
+    const previewImage = document.getElementById('preview-image');
+    const previewContainer = document.getElementById('preview-container');
     let audioContext;
     let gainNode;
     let audioInitialized = false;
@@ -124,28 +126,81 @@ document.addEventListener('DOMContentLoaded', function () {
         updateBackgroundAndMusic();
     });
 
+    // Initialize audio context and play audio on play button click
     playButton.addEventListener('click', function () {
         initializeAudio();
         playAudio();
         playOverlay.style.display = 'none';
     });
 
+    // Add event listener to toggle music
     musicButton.addEventListener('click', toggleMusic);
 
+    // Add event listener for the upload button to open the modal
     feedButton.addEventListener('click', function () {
         modal.style.display = 'block';
     });
 
+    // Add event listener to close the modal
     closeModalButton.addEventListener('click', function () {
         modal.style.display = 'none';
     });
 
+    // Close the modal when clicking outside of it
     window.addEventListener('click', function (event) {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
 
+    // Add event listener to handle file selection and preview
+    fileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        handleFile(file);
+    });
+
+    const handleFile = (file) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                previewImage.classList.add('has-image');
+                // Remove label wrapping to make the uploaded image non-clickable
+                const label = document.querySelector('#preview-container label');
+                if (label) {
+                    label.replaceWith(...label.childNodes);
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewImage.src = 'assets/icons/camera.png';
+            previewImage.classList.remove('has-image');
+            // Wrap the preview image in a label to make it clickable again
+            const label = document.createElement('label');
+            label.htmlFor = 'file-input';
+            label.appendChild(previewImage);
+            previewContainer.appendChild(label);
+        }
+    };
+
+    // Drag-and-drop functionality
+    previewContainer.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        previewContainer.classList.add('dragging');
+    });
+
+    previewContainer.addEventListener('dragleave', function () {
+        previewContainer.classList.remove('dragging');
+    });
+
+    previewContainer.addEventListener('drop', function (e) {
+        e.preventDefault();
+        previewContainer.classList.remove('dragging');
+        const file = e.dataTransfer.files[0];
+        handleFile(file);
+    });
+
+    // Add keyboard event listener for arrow keys
     document.addEventListener('keydown', async function (event) {
         if (event.key === 'ArrowLeft') {
             currentBgIndex = (currentBgIndex - 1 + backgrounds.length) % backgrounds.length;
@@ -158,5 +213,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Load the first background and music initially
     updateBackgroundAndMusic();
 });
