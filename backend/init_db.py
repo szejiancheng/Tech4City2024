@@ -9,9 +9,11 @@ def init_db():
     ## Create table for uploaded images
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Images (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filepath TEXT NOT NULL,
-            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            image_id INTEGER UNIQUE NOT NULL,
+            user_id TEXT NOT NULL, 
+            image_data BLOB,
+            upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (image_id, user_id)
         );
     ''')
     print('Images table created!')
@@ -28,12 +30,14 @@ def init_db():
     ## Create table for classification results
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
             image_id INTEGER,
             label_id INTEGER,
             confidence_score REAL,
             result_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (image_id) REFERENCES Images (id),
+            FOREIGN KEY (image_id) REFERENCES Images (image_id),
+            FOREIGN KEY (user_id) REFERENCES Images (user_id),
             FOREIGN KEY (label_id) REFERENCES Labels (id)
         );
     ''')
