@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeDiaryModalButton = document.querySelector('.diary-close-button');
     const fileInput = document.getElementById('file-input');
     const previewImage = document.getElementById('preview-image');
-    const diaryPreviewImage = document.getElementById('diary-preview-image'); //no function
     const previewContainer = document.getElementById('preview-container');
     const diaryModal = document.getElementById('diary-modal');
     const usernameModal = document.getElementById('username-modal');
@@ -22,11 +21,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitButton = document.getElementById('submit-button');
     const usernameDisplay = document.getElementById('username-display');
     const changeUserButton = document.getElementById('change-user-button');
+    const diaryPrevButton = document.getElementById('diary-prev-button');
+    const diaryNextButton = document.getElementById('diary-next-button');
     let audioContext;
     let gainNode;
     let audioInitialized = false;
     let isMusicPlaying = true;
     let currentFile;
+    let imageId; // Store the image_id from the backend
+    let diaryResults = [];
+    let currentDiaryIndex = 0;
 
     const backgrounds = [
         { img: 'assets/backgrounds/beach.png', music: 'assets/music/beach.wav' },
@@ -259,7 +263,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateBackgroundAndMusic();
 
-    diaryButton.addEventListener('click', function () {
+    diaryButton.addEventListener('click', async function () {
+        await fetchDiaryResults();
         diaryModal.style.display = 'block';
     });
 
@@ -294,7 +299,20 @@ document.addEventListener('DOMContentLoaded', function () {
         usernameModal.style.display = 'block';
     });
 
-    // Checks the cache to see if there is a username
+    diaryPrevButton.addEventListener('click', function () {
+        if (currentDiaryIndex > 0) {
+            currentDiaryIndex--;
+            displayDiaryResult(diaryResults[currentDiaryIndex]);
+        }
+    });
+
+    diaryNextButton.addEventListener('click', function () {
+        if (currentDiaryIndex < diaryResults.length - 1) {
+            currentDiaryIndex++;
+            displayDiaryResult(diaryResults[currentDiaryIndex]);
+        }
+    });
+
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
         usernameDisplay.textContent = `welcome, ${storedUsername}`;
@@ -321,7 +339,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Analysis result:', data);
-                alert('Analysis complete. Check console for details.');
+                imageId = data.image_obj.image_id; 
+                updateDiaryModal(data);
+                diaryModal.style.display = 'block';
             } else {
                 console.error('Analysis request failed:', response.statusText);
                 alert('Analysis request failed.');
@@ -329,6 +349,158 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error during analysis request:', error);
             alert('Error during analysis request.');
+        }
+    };
+
+    // Fetch diary results (GET)
+    const fetchDiaryResults = async () => {
+        const username = localStorage.getItem('username');
+        if (!username) {
+            alert('Username not available');
+            return;
+        }
+
+        try {
+            const response = await fetch(`https://api.example.com/results?user_id=${username}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                diaryResults = data;
+                currentDiaryIndex = diaryResults.length - 1;
+                if (diaryResults.length > 0) {
+                    displayDiaryResult(diaryResults[currentDiaryIndex]);
+                } else {
+                    displayEmptyDiary();
+                }
+            } else {
+                console.error('Failed to fetch diary results:', response.statusText);
+                alert('Failed to fetch diary results.');
+                displayEmptyDiary();
+            }
+        } catch (error) {
+            console.error('Error fetching diary results:', error);
+            alert('Error fetching diary results.');
+            displayEmptyDiary();
+        }
+    };
+
+    const displayEmptyDiary = () => {
+        const diaryPreviewImage = document.getElementById('diary-preview-image');
+        const diaryEmptyMessage = document.getElementById('diary-empty-message');
+        const diaryResultsContainer = document.getElementById('diary-results-container');
+        
+        diaryPreviewImage.src = 'assets/icons/camera.png';
+        diaryPreviewImage.classList.remove('has-image');
+        diaryEmptyMessage.style.display = 'block';
+        diaryResultsContainer.innerHTML = '';
+    };
+
+    // Edit the diary modal with the analyze results
+    const updateDiaryModal = (results) => {
+        const diaryPreviewImage = document.getElementById('diary-preview-image');
+        const diaryEmptyMessage = document.getElementById('diary-empty-message');
+        const diaryResultsContainer = document.getElementById('diary-results-container');
+        const { image_obj, results_obj } = results;
+
+        // Update preview image
+        diaryPreviewImage.src = URL.createObjectURL(currentFile);
+        diaryPreviewImage.classList.add('has-image');
+        diaryEmptyMessage.style.display = 'none';
+
+        // Clear previous results
+        diaryResultsContainer.innerHTML = '';
+
+        // Append result timestamp
+        const resultTimestamp = document.createElement('p');
+        resultTimestamp.textContent = `Result Timestamp: ${results_obj[0].result_timestamp}`;
+        diaryResultsContainer.appendChild(resultTimestamp);
+
+        // Create table for results
+        const table = document.createElement('table');
+        const headerRow = document.createElement('tr');
+        const classificationHeader = document.createElement('th');
+        classificationHeader.textContent = 'Classification Result';
+        const confidenceHeader = document.createElement('th');
+        confidenceHeader.textContent = 'Confidence Score';
+        headerRow.appendChild(classificationHeader);
+        headerRow.appendChild(confidenceHeader);
+        table.appendChild(headerRow);
+
+        results_obj.forEach(result => {
+            const row = document.createElement('tr');
+            row.addEventListener('click', () => selectLabel(result.result_id));
+
+            const classificationCell = document.createElement('td');
+            classificationCell.textContent = result.classification_result;
+            const confidenceCell = document.createElement('td');
+            confidenceCell.textContent = result.confidence_score.toFixed(2);
+
+            row.appendChild(classificationCell);
+            row.appendChild(confidenceCell);
+            table.appendChild(row);
+        });
+
+        diaryResultsContainer.appendChild(table);
+    };
+
+    const displayDiaryResult = (result) => {
+        const diaryPreviewImage = document.getElementById('diary-preview-image');
+        const diaryEmptyMessage = document.getElementById('diary-empty-message');
+        const diaryResultsContainer = document.getElementById('diary-results-container');
+        
+        // Update preview image
+        diaryPreviewImage.src = result.image_data;
+        diaryPreviewImage.classList.add('has-image');
+        diaryEmptyMessage.style.display = 'none';
+
+        // Clear previous results
+        diaryResultsContainer.innerHTML = '';
+
+        // Append result timestamp
+        const resultTimestamp = document.createElement('p');
+        resultTimestamp.textContent = `Result Timestamp: ${result.result_timestamp}`;
+        diaryResultsContainer.appendChild(resultTimestamp);
+
+        // Display selected label
+        const label = document.createElement('p');
+        label.textContent = `Selected Label: ${result.classification_result}`;
+        diaryResultsContainer.appendChild(label);
+    };
+
+    // API Request for select label (POST)
+    const selectLabel = async (resultId) => {
+        const username = localStorage.getItem('username');
+        if (!username || !imageId || !resultId) {
+            alert('Missing data to select label');
+            return;
+        }
+
+        const payload = {
+            user_id: username,
+            image_id: imageId,
+            result_id: resultId
+        };
+
+        try {
+            const response = await fetch('https://api.example.com/select', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                console.log('Label selected successfully');
+                alert('Label selected successfully');
+                await fetchDiaryResults(); // calls refresh diary after selecting label
+            } else {
+                console.error('Label selection failed:', response.statusText);
+                alert('Label selection failed.');
+            }
+        } catch (error) {
+            console.error('Error during label selection:', error);
+            alert('Error during label selection.');
         }
     };
 });

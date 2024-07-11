@@ -67,25 +67,31 @@
     <div id="diary-modal" class="diary-modal">
         <div class="diary-modal-content">
             <span class="diary-close-button">&times;</span>
-            <h2>add diary history</h2>
-            <div id="preview-container" class="drag-and-drop">
-                <label for="file-input">
-                    <img id="diary-preview-image" src="assets/icons/camera.png" alt="Preview" class="diary-preview-image">
-                    <p>Drag & Drop your image here or click to upload</p>
-                </label>
+            <h2>Diary History</h2>
+            <div id="diary-preview-container" class="diary-preview-container">
+                <img id="diary-preview-image" src="assets/icons/camera.png" alt="Preview" class="diary-preview-image">
+                <p id="diary-empty-message" class="diary-empty-message">The diary is empty right now.</p>
+            </div>
+            <div id="diary-results-container"></div>
+            <div class="diary-navigation">
+                <button id="diary-prev-button" class="diary-nav-button">
+                    <img src="assets/icons/leftarrow.png" class="rotated-180" alt="Previous">
+                </button>
+                <button id="diary-next-button" class="diary-nav-button">
+                    <img src="assets/icons/rightarrow.png" alt="Next">
+                </button>
             </div>
         </div>
     </div>
+    
 
     <div id="username-modal" class="username-modal">
         <div class="username-modal-content">
             <h2>enter username</h2>
-            <div id="preview-container" class="drag-and-drop">
                 <form id="username-form">
                     <input type="text" id="username" name="username" class="username-input"><br>
                     <button type="button" id="submit-button" class="button submit-button">Submit</button>
                 </form>
-            </div>
         </div>
     </div>
 
