@@ -19,7 +19,7 @@
                     <img src="assets/icons/diary.png" class="diary-icon" alt="Diary">
                 </button>
             </div>
-            <button id="menu-button" class="menu-button">menu</button>
+            <button id="menu-button" class="menu-button">welcome</button>
             <div class="content">
                 <img id="pet" src="assets/pets/frogbro.gif" class="pet" alt="Pet">
                 <button id="feed-button" class="button">upload</button>
@@ -65,6 +65,23 @@
         <div class="diary-modal-content">
             <span class="diary-close-button">&times;</span>
             <h2>add diary history</h2>
+            <div id="preview-container" class="drag-and-drop">
+                <label for="file-input">
+                    <img id="diary-preview-image" src="assets/icons/camera.png" alt="Preview" class="diary-preview-image">
+                    <p>Drag & Drop your image here or click to upload</p>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="username-modal" class="username-modal">
+        <div class="username-modal-content">
+            <h2>enter username</h2>
+            <div id="preview-container" class="drag-and-drop">
+                <form>
+                    <input type="text" id="username" name="username"><br>
+                </form>
+            </div>
         </div>
     </div>
 

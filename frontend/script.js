@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeDiaryModalButton = document.querySelector('.diary-close-button');
     const fileInput = document.getElementById('file-input');
     const previewImage = document.getElementById('preview-image');
+    const diaryPreviewImage = document.getElementById('diary-preview-image'); //no function
     const previewContainer = document.getElementById('preview-container');
     const diaryModal = document.getElementById('diary-modal');
+    const usernameModal = document.getElementById('username-modal');
     let audioContext;
     let gainNode;
     let audioInitialized = false;
@@ -133,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeAudio();
         playAudio();
         playOverlay.style.display = 'none';
+        usernameModal.style.display = 'block';
     });
 
     musicButton.addEventListener('click', toggleMusic);
@@ -262,5 +265,10 @@ document.addEventListener('DOMContentLoaded', function () {
             diaryModal.style.display = 'none';
         }
     });
+
+    //add username input
+    function name() {
+        var input = document.getElementById("username");
+    };
 
 });
