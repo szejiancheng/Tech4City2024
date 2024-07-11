@@ -8,11 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const playButton = document.getElementById('play-button');
     const musicButton = document.getElementById('music-button');
     const feedButton = document.getElementById('feed-button');
+    const diaryButton = document.getElementById('diary-button');
     const modal = document.getElementById('upload-modal');
     const closeModalButton = document.querySelector('.close-button');
+    const closeDiaryModalButton = document.querySelector('.diary-close-button');
     const fileInput = document.getElementById('file-input');
     const previewImage = document.getElementById('preview-image');
     const previewContainer = document.getElementById('preview-container');
+    const diaryModal = document.getElementById('diary-modal');
     let audioContext;
     let gainNode;
     let audioInitialized = false;
@@ -242,4 +245,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     updateBackgroundAndMusic();
+
+    // Add event listener for the diary button to open the diary modal
+    diaryButton.addEventListener('click', function () {
+        diaryModal.style.display = 'block';
+    });
+
+    // Add event listener to close the modal
+    closeDiaryModalButton.addEventListener('click', function () {
+        diaryModal.style.display = 'none';
+    });
+
+    // Close the modal when clicking outside of it
+    window.addEventListener('click', function (event) {
+        if (event.target === diaryModal) {
+            diaryModal.style.display = 'none';
+        }
+    });
+
 });
