@@ -8,29 +8,29 @@ servers:
   - url: 'https://api.example.com'
     description: 'placeholder 2'
 paths:
-  /images:
-    post:
-      summary: Uploading an image
-      requestBody: 
-        description: Image to be classified
-        required: true
-        content: 
-          application/octet-stream: {}
+  /results:
+    get:
+      summary: Get all results
       responses:
         '200': 
-          description: Successfully uploaded
+          description: Successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
 
-  /images/{imageId}:
+  /results/{filepath}:
     get:
-      summary: Get image by ID
+      summary: Get image and results by filepath
       parameters:
-        - name: imageId
+        - name: filepath
           in: path
-          description: Get image by ID
+          description: Filepath of image
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -41,7 +41,7 @@ paths:
         '404':
           description: Image not found
 
-  /infer:
+  /analyze:
     post:
       summary: Running inference with model
       requestBody: 
