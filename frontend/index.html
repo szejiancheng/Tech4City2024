@@ -19,7 +19,10 @@
                     <img src="assets/icons/diary.png" class="diary-icon" alt="Diary">
                 </button>
             </div>
-            <button id="menu-button" class="menu-button">welcome</button>
+            <div class="username-display-container">
+                <div class="username-display" id="username-display"></div> 
+                <button id="change-user-button" class="change-user-button">change user</button>
+            </div>
             <div class="content">
                 <img id="pet" src="assets/pets/frogbro.gif" class="pet" alt="Pet">
                 <button id="feed-button" class="button">upload</button>
@@ -78,8 +81,9 @@
         <div class="username-modal-content">
             <h2>enter username</h2>
             <div id="preview-container" class="drag-and-drop">
-                <form>
-                    <input type="text" id="username" name="username"><br>
+                <form id="username-form">
+                    <input type="text" id="username" name="username" class="username-input"><br>
+                    <button type="button" id="submit-button" class="button submit-button">Submit</button>
                 </form>
             </div>
         </div>

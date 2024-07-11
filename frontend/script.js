@@ -18,10 +18,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const previewContainer = document.getElementById('preview-container');
     const diaryModal = document.getElementById('diary-modal');
     const usernameModal = document.getElementById('username-modal');
+    const usernameInput = document.getElementById('username');
+    const submitButton = document.getElementById('submit-button');
+    const usernameDisplay = document.getElementById('username-display');
+    const changeUserButton = document.getElementById('change-user-button');
     let audioContext;
     let gainNode;
     let audioInitialized = false;
     let isMusicPlaying = true;
+    let currentFile;
 
     const backgrounds = [
         { img: 'assets/backgrounds/beach.png', music: 'assets/music/beach.wav' },
@@ -135,7 +140,11 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeAudio();
         playAudio();
         playOverlay.style.display = 'none';
-        usernameModal.style.display = 'block';
+        
+        const storedUsername = localStorage.getItem('username');
+        if (!storedUsername) {
+            usernameModal.style.display = 'block';
+        }
     });
 
     musicButton.addEventListener('click', toggleMusic);
@@ -161,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const handleFile = (file) => {
         if (file) {
+            currentFile = file;
             const reader = new FileReader();
             reader.onload = function (e) {
                 previewImage.src = e.target.result;
@@ -182,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const analyseButton = document.createElement('button');
         analyseButton.classList.add('analyse-button');
         analyseButton.textContent = 'Analyse';
+        analyseButton.addEventListener('click', sendAnalyseRequest);
         previewContainer.appendChild(analyseButton);
     };
 
@@ -218,7 +229,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Drag drop functionality
     previewContainer.addEventListener('dragover', function (e) {
         e.preventDefault();
         previewContainer.classList.add('dragging');
@@ -249,26 +259,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateBackgroundAndMusic();
 
-    // Add event listener for the diary button to open the diary modal
     diaryButton.addEventListener('click', function () {
         diaryModal.style.display = 'block';
     });
 
-    // Add event listener to close the modal
     closeDiaryModalButton.addEventListener('click', function () {
         diaryModal.style.display = 'none';
     });
 
-    // Close the modal when clicking outside of it
     window.addEventListener('click', function (event) {
         if (event.target === diaryModal) {
             diaryModal.style.display = 'none';
         }
     });
 
-    //add username input
-    function name() {
-        var input = document.getElementById("username");
-    };
+    usernameInput.addEventListener('input', function () {
+        if (usernameInput.value.trim() !== '') {
+            submitButton.style.display = 'block';
+        } else {
+            submitButton.style.display = 'none';
+        }
+    });
 
+    submitButton.addEventListener('click', function () {
+        const username = usernameInput.value.trim();
+        if (username) {
+            localStorage.setItem('username', username);
+            usernameDisplay.textContent = `welcome, ${username}`;
+            usernameModal.style.display = 'none';
+        }
+    });
+
+    changeUserButton.addEventListener('click', function () {
+        usernameModal.style.display = 'block';
+    });
+
+    // Checks the cache to see if there is a username
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+        usernameDisplay.textContent = `welcome, ${storedUsername}`;
+    }
+
+    // API request for Analyse (POST)
+    const sendAnalyseRequest = async () => {
+        const username = localStorage.getItem('username');
+        if (!username || !currentFile) {
+            alert('Username or image not available');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('user_id', username);
+        formData.append('image_data', currentFile);
+
+        try {
+            const response = await fetch('https://api.example.com/analyze', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Analysis result:', data);
+                alert('Analysis complete. Check console for details.');
+            } else {
+                console.error('Analysis request failed:', response.statusText);
+                alert('Analysis request failed.');
+            }
+        } catch (error) {
+            console.error('Error during analysis request:', error);
+            alert('Error during analysis request.');
+        }
+    };
 });
