@@ -22,12 +22,21 @@ paths:
       responses:
         '200': 
           description: Successfully retrieved user's results
-          content:
+          content: 
+          # List of {image, result} objects
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Result'
+                  type: object
+                  properties:
+                    image:
+                      type: object
+                        $ref: '#/components/schemas/Image'
+                    results:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Result'
         '400':
           description: Invalid ID / No results found
   /analyze:
@@ -45,17 +54,12 @@ paths:
         '200': 
           description: Successful inference
           content:
-            multipart/form-data:
+          # List of results
+            application/json:
               schema:
-                type: object
-                properties:
-                  image:
-                    type: array
-                    $ref: '#/components/schemas/Image'
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Result'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
         '400':
           description: Error with payload or model
   /select:
@@ -71,8 +75,16 @@ paths:
       responses:
         '200': 
           description: Successful inference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
         '400':
           description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
 
 components:
   schemas:
@@ -98,9 +110,6 @@ components:
         image_data:
           type: string
           format: binary
-        image_id:
-          type: integer
-          format: int64
     Result:
       type: object
       properties:
@@ -109,8 +118,9 @@ components:
           format: int64
         user_id:
           type: str
-        image_obj:
-          $ref: '#/components/schemas/Image'
+        image_id:
+          type: integer
+          format: int64
         label_name:
           type: string
         confidence_score:
