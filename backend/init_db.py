@@ -35,6 +35,7 @@ def init_db():
             label TEXT NOT NULL,
             confidence_score REAL,
             result_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            preferred INTEGER DEFAULT 0,
             FOREIGN KEY (image_id) REFERENCES Images (image_id)
         );
     ''')
