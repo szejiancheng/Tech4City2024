@@ -18,27 +18,26 @@ def init_db():
     ''')
     print('Images table created!')
 
-    ## Create table for classification labels
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Labels (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            label_name TEXT NOT NULL UNIQUE
-        );
-    ''')
-    print('Labels table created!')
+    # ## Create table for classification labels
+    # cursor.execute('''
+    #     CREATE TABLE IF NOT EXISTS Labels (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         label_name TEXT NOT NULL UNIQUE
+    #     );
+    # ''')
+    # print('Labels table created!')
 
     ## Create table for classification results
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Results (
             result_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            image_id INTEGER,
-            label_id INTEGER,
+            user_id TEXT NOT NULL,
+            image_id INTEGER NOT NULL,
+            label TEXT NOT NULL,
             confidence_score REAL,
             result_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (image_id) REFERENCES Images (image_id),
-            FOREIGN KEY (user_id) REFERENCES Images (user_id),
-            FOREIGN KEY (label_id) REFERENCES Labels (id)
+            FOREIGN KEY (user_id) REFERENCES Images (user_id)
         );
     ''')
     print('Results table created!')
@@ -61,15 +60,15 @@ def check_db():
     results_schema = cursor.fetchall()
     print('Schema of the Results table:\n', results_schema)
 
-    # Check the schema of the Images table
+    ## Check the schema of the Images table
     cursor.execute('PRAGMA table_info(Images);')
     images_schema = cursor.fetchall()
     print('Schema of the Images table:\n', images_schema)
 
-    # Check the schema of the Labels table
-    cursor.execute('PRAGMA table_info(Labels);')
-    labels_schema = cursor.fetchall()
-    print('Schema of the Labels table:\n', labels_schema)
+    # ## Check the schema of the Labels table
+    # cursor.execute('PRAGMA table_info(Labels);')
+    # labels_schema = cursor.fetchall()
+    # print('Schema of the Labels table:\n', labels_schema)
 
     connection.close()
 
