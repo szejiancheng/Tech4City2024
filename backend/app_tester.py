@@ -3,7 +3,7 @@ from app import app
 from init_db import init_db, check_db
 import json
 
-BASE_URL = 'http://127.0.0.1:5000'
+BASE_URL = 'http://127.0.0.1:8000'
 DATABASE = 'backend/test_database.db'
 
 
@@ -23,7 +23,7 @@ def analyze_query(test_client, image_data):
     ## Send image data in the request body
     response = test_client.post('/analyze', data=data, headers=headers)  
 
-    return response.text, response.status_code
+    return response
 
 
 ## Test the /select endpoint
@@ -41,7 +41,7 @@ def select_query(test_client, result_id):
     ## Send data to client
     response = test_client.post('/select', data=json.dumps(data), headers=headers)
 
-    return response.text, response.status_code
+    return response
 
 
 ## Test the /results/<user_id> endpoint
@@ -51,7 +51,7 @@ def results_query(test_client, user_id):
     ## Redirect to user specific endpoint
     response = test_client.get(f'/results/{user_id}')
 
-    return response.text, response.status_code
+    return response
 
 ## Main method to execute all tests
 def execute_tests(initialize_db=False, analyze=False, select=False, results=False):
@@ -68,15 +68,19 @@ def execute_tests(initialize_db=False, analyze=False, select=False, results=Fals
     ## Test /analyze path with image upload
     if analyze:
         with open('backend/static/ramen.jpg', 'rb') as image:
-            print(analyze_query(client, image_data=image))
+            analyze_response = analyze_query(client, image_data=image)
+            print(analyze_response.text, analyze_response.status_code)
 
-    ## Test /select with result_id = 3
+    ## Test /select with result_id
+    result_id=33
     if select:
-        print(select_query(client, result_id=3))
+        select_response = select_query(client, result_id=result_id)
+        print(select_response.text, select_response.status_code)
 
     ## Test /results/<user_id> with user_id = "test_user"
     if results:
-        print(results_query(client, user_id='test_user'))
+        results_response = results_query(client, user_id='test_user')
+        print(results_response.text, results_response.status_code)
     
 
 
@@ -96,6 +100,20 @@ def check_table(db, table_name):
     connection.close()
 
 
+def clear_table(db, table_name):
+    connection = sqlite3.connect(db)
+    cursor = connection.cursor()
+
+    cursor.execute(f'''
+        DELETE FROM {table_name}
+    ''')
+    connection.commit()
+
+    connection.close()
+
+
 if __name__ == '__main__':
-    execute_tests(results=True)
+    clear_table(DATABASE, 'Images')
+    clear_table(DATABASE, 'Results')
+    # execute_tests(analyze=True, select=True, results=True)
     # check_table(DATABASE, 'Results')

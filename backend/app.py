@@ -1,13 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
-from requests_toolbelt.multipart import MultipartEncoder
+# from requests_toolbelt.multipart import MultipartEncoder
+import base64
 
 
 app = Flask(__name__) 
 CORS(app)
 
-DATABASE = 'backend/test_database.db'
+DATABASE = 'backend/database.db'
 app.config['DATABASE'] = DATABASE
 
 # Perform AI processing on the input data
@@ -138,22 +139,40 @@ def get_images_by_id(user_id, image_id_lst):
         (curr_image_id, curr_user_id, curr_image_data, curr_file_path, curr_content_type, curr_upload_date) = row
         # Convert data to string so that they can be encoded
         curr_obj = {
-            'image_id': str(curr_image_id),
+            'image_id': curr_image_id,
             'user_id': curr_user_id,
-            'image_data': (curr_file_path, curr_image_data, curr_content_type),
-            'upload_date': str(curr_upload_date)
+            'image_data': base64.b64encode(curr_image_data).decode('utf-8'),
+            'upload_date': curr_upload_date
         }
 
         # Create multipart response using encoder
-        ret_images[curr_image_id] = MultipartEncoder(fields=curr_obj)
+        # ret_images[curr_image_id] = MultipartEncoder(fields=curr_obj)
+        ret_images[curr_image_id] = curr_obj
 
     return ret_images
+
+# Check if user exists
+def check_user(user_id):
+    connection = sqlite3.connect(app.config['DATABASE'])
+    cursor = connection.cursor()
+
+    cursor.execute(f'''
+        SELECT * FROM Images WHERE user_id = "{user_id}"
+    ''')
+    row = cursor.fetchone()
+    connection.close()
+
+    return True if row else False
 
 
 # GET /results: Retrieves (preferred) results of user's uploaded images from the database.
 @app.route('/results/<user_id>', methods=['GET'])  
 def get_results(user_id):
     print('Fetching results...')
+
+    # Check if user exists
+    if not check_user(user_id):
+        return jsonify({'error': 'No such user'}), 400
 
     # Each output should be a {image: _, results: _} object
     ret_output = []
@@ -243,4 +262,4 @@ def select():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8000)
