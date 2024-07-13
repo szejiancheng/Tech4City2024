@@ -1,31 +1,34 @@
 from flask import Flask, jsonify, request
-# from flask_cors import CORS
+from flask_cors import CORS
 import sqlite3
 from requests_toolbelt.multipart import MultipartEncoder
 
 
 app = Flask(__name__) 
-# CORS(app)
+CORS(app)
 
-DATABASE = 'backend/database.db'
+DATABASE = 'backend/test_database.db'
+app.config['DATABASE'] = DATABASE
 
-#Function stubs:
+# Perform AI processing on the input data
 def perform_ai_processing(data):
-    # Perform AI processing on the input data
+    print('Performing AI inference...')
 
     # Returns json with predicted classes and respective confidence scores
     ## result = [list of {'label': str, 'confidence_score': float}]
-    return
+    return [{'label': 'fish', 'confidence_score': '0.876'},
+            {'label': 'chicken', 'confidence_score': '0.543'}]
 
 # Store the input and result in the database
 def store_in_database(data, result):
-    connection = sqlite3.connect(DATABASE)
+    print('Storing data in database...')
+
+    connection = sqlite3.connect(app.config['DATABASE'])
     cursor = connection.cursor()
 
     # Extract data
     user_id, image_data, file_path, content_type = \
         data['user_id'], data['image_data'], data['file_path'], data['content_type']
-    label, confidence_score = pred['label'], pred['confidence_score']
 
     # Store image data in Images table
     cursor.execute('''
@@ -37,48 +40,61 @@ def store_in_database(data, result):
     # Store inference data in Results table
     rows = []
     for pred in result:
+        label, confidence_score = pred['label'], pred['confidence_score']
         rows.append((image_id, user_id, label, confidence_score))
     cursor.executemany('''
         INSERT INTO Results (image_id, user_id, label, confidence_score) VALUES (?, ?, ?, ?)
     ''', rows)
+    connection.commit()
     result_id = cursor.lastrowid
 
     connection.close()
+    print(f'Image added in database: {image_id} with result: {result_id}')
 
     return image_id, result_id
 
 
 # Fetch results from the database
 def fetch_results(user_id, image_id = None, selected = False):
-    connection = sqlite3.connect(DATABASE)
+    print(f'Fetching results for user {user_id}...')
+
+    connection = sqlite3.connect(app.config['DATABASE'])
     cursor = connection.cursor()
 
     # Retrieve data from db. If necessary, filter for specific image or only verified results
     sql = f'''
-        SELECT * FROM Results WHERE user.id = {user_id} 
+        SELECT * FROM Results WHERE user_id = "{user_id}" 
     '''
     if image_id:
         sql += f'''
-            WHERE Results.image_id = {image_id}
+            AND image_id = {image_id}
         '''
     if selected:
         sql += f'''
-            WHERE Results.selected = 1
+            AND preferred = 1
         '''
+    # print(sql)
     cursor.execute(sql)
     results = cursor.fetchall()
+
+    if not results:
+        print(f'No results found!')
+
     connection.close()
 
     # Process table into output
     ret_output = []
     if results:
         for result in results:
+            (curr_result_id, curr_user_id, curr_image_id, curr_label, \
+             curr_confidence_score, curr_result_timestamp, _) = result
             ret_output.append({
-                'result_id': result['result_id'],
-                'user_id': result['user_id'],
-                'image_id': result['image_id'],
-                'label_name': result['label'],
-                'result_timestamp': result['result_date'] 
+                'result_id': curr_result_id,
+                'user_id': curr_user_id,
+                'image_id': curr_image_id,
+                'label_name': curr_label,
+                'confidence_score': curr_confidence_score,
+                'result_timestamp': curr_result_timestamp 
             })
 
     return ret_output
@@ -86,7 +102,7 @@ def fetch_results(user_id, image_id = None, selected = False):
 # Updates database to indicate result preferred by user
 def set_preference(result_id):
     success = True
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(app.config['DATABASE'])
     cursor = connection.cursor()
 
     # Update table
@@ -104,15 +120,15 @@ def get_images_by_id(user_id, image_id_lst):
     # Output format = {image_id: image_obj}
     ret_images = {}
 
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(app.config['DATABASE'])
     cursor = connection.cursor()
 
     # Placeholder string for the SQL query, ie (?, ?, ?) of the correct length
-    placeholder = ','.join(['?' for _ in len(image_id_lst)])
+    placeholder = ','.join(['?' for _ in range(len(image_id_lst))])
 
     # Fetch rows from Images table
     cursor.execute(f'''
-        SELECT * FROM Images WHERE user_id = {user_id} AND image_id IN ({placeholder})
+        SELECT * FROM Images WHERE user_id = "{user_id}" AND image_id IN ({placeholder})
     ''', image_id_lst)
     rows = cursor.fetchall()
     connection.close()
@@ -120,11 +136,12 @@ def get_images_by_id(user_id, image_id_lst):
     # Create image objects
     for row in rows:
         (curr_image_id, curr_user_id, curr_image_data, curr_file_path, curr_content_type, curr_upload_date) = row
+        # Convert data to string so that they can be encoded
         curr_obj = {
-            'image_id': curr_image_id,
+            'image_id': str(curr_image_id),
             'user_id': curr_user_id,
             'image_data': (curr_file_path, curr_image_data, curr_content_type),
-            'upload_date': curr_upload_date
+            'upload_date': str(curr_upload_date)
         }
 
         # Create multipart response using encoder
@@ -136,6 +153,8 @@ def get_images_by_id(user_id, image_id_lst):
 # GET /results: Retrieves (preferred) results of user's uploaded images from the database.
 @app.route('/results/<user_id>', methods=['GET'])  
 def get_results(user_id):
+    print('Fetching results...')
+
     # Each output should be a {image: _, results: _} object
     ret_output = []
 
@@ -157,11 +176,14 @@ def get_results(user_id):
     # Sort in upload order (earliest -> latest)
     ret_output.sort(key=lambda obj: obj['image']['upload_date'])
 
+    # Output should not be jsonify-ied as it is a multipart response
     return ret_output, 200
 
 @app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
 def analyze():  
+    print('Analyzing...')
+
     # Check if data is present
     if 'file' not in request.files or 'user_id' not in request.form:
         return jsonify({'error': 'File and user ID are required'}), 400
@@ -189,7 +211,7 @@ def analyze():
     ## data = {'user_id': str, 'image_data': binary str}
     ## result = [list of {'label': str, 'confidence_score': float}]
     image_id, result_id = store_in_database(data, result)
-    if not (image_id and result_id):
+    if image_id == None or result_id == None:
         return jsonify({'error': 'failed to add data to database'}), 400
     
     # Generate list of result_obj
@@ -201,7 +223,8 @@ def analyze():
 # POST /select: Accepts result that is preferred by user and updates database accordingly
 @app.route('/select', methods=['POST'])  
 def select():
-    data = request.data
+    print('Setting user preferrence...')
+    data = request.get_json()
     # Check if data is present
     if not data:
         # Return error response if no data is found
@@ -217,3 +240,7 @@ def select():
         jsonify({'error': 'Invalid request'}), 400
     
     return jsonify({'message': 'Preference set successfully!'}), 200
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

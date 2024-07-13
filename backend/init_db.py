@@ -2,8 +2,8 @@ import sqlite3
 
 DATABASE = 'backend/database.db'
 
-def init_db():
-    connection = sqlite3.connect(DATABASE)
+def init_db(db):
+    connection = sqlite3.connect(db)
     cursor = connection.cursor()
     
     ## Create table for uploaded images
@@ -47,8 +47,8 @@ def init_db():
     connection.close()
 
 
-def check_db():
-    connection = sqlite3.connect(DATABASE)
+def check_db(db):
+    connection = sqlite3.connect(db)
     cursor = connection.cursor()
 
     ## Get list of tables
@@ -73,6 +73,6 @@ def check_db():
 
     connection.close()
 
-
-init_db()
-check_db()
+if __name__ == '__main__':
+    init_db(DATABASE)
+    check_db(DATABASE)
