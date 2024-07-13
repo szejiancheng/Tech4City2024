@@ -12,6 +12,8 @@ def init_db():
             image_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id TEXT NOT NULL, 
             image_data BLOB,
+            file_path TEXT NOT NULL,
+            content_type TEXT NOT NULL,
             upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     ''')

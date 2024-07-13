@@ -23,14 +23,14 @@ def store_in_database(data, result):
     cursor = connection.cursor()
 
     # Extract data
-    user_id, image_data = data['user_id'], data['image_data']
+    user_id, image_data, file_path, content_type = \
+        data['user_id'], data['image_data'], data['file_path'], data['content_type']
     label, confidence_score = pred['label'], pred['confidence_score']
 
     # Store image data in Images table
-    # TODO: Update to include file_path and content_type
     cursor.execute('''
-        INSERT INTO Images (user_id, image_data) VALUES (?, ?)
-    ''', (user_id, image_data))
+        INSERT INTO Images (user_id, image_data, file_path, content_type) VALUES (?, ?, ?, ?)
+    ''', (user_id, image_data, file_path, content_type))
     connection.commit()
     image_id = cursor.lastrowid
 
@@ -161,18 +161,29 @@ def get_results(user_id):
 
 @app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
-def analyze():
-    # Access the raw data (file path) from the request
-    data = request.data
+def analyze():  
     # Check if data is present
-    if not data:
-        # Return error response if no data is found
-        return jsonify({'error': 'No image found'}), 400
-
+    if 'file' not in request.files or 'user_id' not in request.form:
+        return jsonify({'error': 'File and user ID are required'}), 400
+    
+    # Retrieve file and user_id
+    file = request.files['file']
+    user_id = request.form['user_id']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
     # Perform AI processing on the input data
-    result = perform_ai_processing(data)
+    result = perform_ai_processing(file)
     if not result:
         return jsonify({'error': 'failed to make inference'}), 400
+    
+    # Collate data to be stored in the database
+    data = {
+        'user_id': user_id,
+        'image_data': file.read(),
+        'file_path': file.filename,
+        'content_type': file.content_type
+    }
 
     # Store the input and result in the database
     ## data = {'user_id': str, 'image_data': binary str}
@@ -182,7 +193,7 @@ def analyze():
         return jsonify({'error': 'failed to add data to database'}), 400
     
     # Generate list of result_obj
-    results_lst = fetch_results(user_id=data['user_id'], image_id=image_id)
+    results_lst = fetch_results(user_id, image_id)
 
     # Return the result
     return jsonify(results_lst), 200
