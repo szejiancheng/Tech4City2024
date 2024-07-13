@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 # from flask_cors import CORS
 import sqlite3
+from requests_toolbelt.multipart import MultipartEncoder
 
 
 app = Flask(__name__) 
@@ -26,6 +27,7 @@ def store_in_database(data, result):
     label, confidence_score = pred['label'], pred['confidence_score']
 
     # Store image data in Images table
+    # TODO: Update to include file_path and content_type
     cursor.execute('''
         INSERT INTO Images (user_id, image_data) VALUES (?, ?)
     ''', (user_id, image_data))
@@ -97,13 +99,65 @@ def set_preference(result_id):
 
     return success
 
+# Get image objects from IDs
+def get_images_by_id(user_id, image_id_lst):
+    # Output format = {image_id: image_obj}
+    ret_images = {}
 
-# GET /results: Retrieves (preferred) results of specified image from the database.
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    # Placeholder string for the SQL query, ie (?, ?, ?) of the correct length
+    placeholder = ','.join(['?' for _ in len(image_id_lst)])
+
+    # Fetch rows from Images table
+    cursor.execute(f'''
+        SELECT * FROM Images WHERE user_id = {user_id} AND image_id IN ({placeholder})
+    ''', image_id_lst)
+    rows = cursor.fetchall()
+    connection.close()
+
+    # Create image objects
+    for row in rows:
+        (curr_image_id, curr_user_id, curr_image_data, curr_file_path, curr_content_type, curr_upload_date) = row
+        curr_obj = {
+            'image_id': curr_image_id,
+            'user_id': curr_user_id,
+            'image_data': (curr_file_path, curr_image_data, curr_content_type),
+            'upload_date': curr_upload_date
+        }
+
+        # Create multipart response using encoder
+        ret_images[curr_image_id] = MultipartEncoder(fields=curr_obj)
+
+    return ret_images
+
+
+# GET /results: Retrieves (preferred) results of user's uploaded images from the database.
 @app.route('/results/<user_id>', methods=['GET'])  
 def get_results(user_id):
+    # Each output should be a {image: _, results: _} object
+    ret_output = []
+
     # Fetch relevant results from the database
     results = fetch_results(user_id=user_id, selected=True)
-    return jsonify(results), 200
+
+    # Fetch relevant image data
+    image_id_lst = [result['image_id'] for result in results]
+    image_obj_dict = get_images_by_id(user_id, image_id_lst)
+
+    # Generate output objects
+    for result in results:
+        curr_output = {
+            'image': image_obj_dict[result['image_id']], 
+            'result': result
+        }
+        ret_output.append(curr_output)
+
+    # Sort in upload order (earliest -> latest)
+    ret_output.sort(key=lambda obj: obj['image']['upload_date'])
+
+    return ret_output, 200
 
 @app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
