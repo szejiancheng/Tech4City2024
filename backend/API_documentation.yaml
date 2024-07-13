@@ -3,10 +3,8 @@ info:
   title: Tech4City Entry Coding Challenge - Cloud Control
   version: 1.0.0
 servers: 
-  - url: 'https://api.example.com'
-    description: 'placeholder'
-  - url: 'https://api.example.com'
-    description: 'placeholder 2'
+  - url: 'http://127.0.0.1:8000'
+    description: 'localhost 8000'
 paths:
   /results/{user_id}:
     get:
@@ -33,15 +31,14 @@ paths:
                     image:
                       type: object
                         $ref: '#/components/schemas/Image'
-                    results:
-                      type: array
-                      items:
+                    result:
+                      type: object
                         $ref: '#/components/schemas/Result'
         '400':
-          description: Invalid ID / No results found
+          description: Invalid ID
   /analyze:
     post:
-      summary: Running inference with model
+      summary: Accept image, run inference, add to database
       requestBody: 
         description: Image to be classified along with user ID
         required: true
@@ -52,7 +49,7 @@ paths:
               $ref: '#/components/schemas/AnalyzeRequest'      
       responses:
         '200': 
-          description: Successful inference
+          description: Successful inference and storage
           content:
           # List of results
             application/json:

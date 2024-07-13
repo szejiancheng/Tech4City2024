@@ -196,7 +196,7 @@ def get_results(user_id):
     ret_output.sort(key=lambda obj: obj['image']['upload_date'])
 
     # Output should not be jsonify-ied as it is a multipart response
-    return ret_output, 200
+    return jsonify(ret_output), 200
 
 @app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
