@@ -338,15 +338,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: formData,
                 mode: 'no-cors'  // Setting the mode to 'no-cors'
             });
-            console.log('response sent?')
+            console.log('Response received:', response);
     
-            if (response && response.ok) {
-                console.log ('response is ok')
+            if (response.ok) {
                 const data = await response.json();
-                console.log('Analysis result:', data);
-                imageId = data[0].image_id; // Store the image_id
-                updateDiaryModal(data);
-                diaryModal.style.display = 'block';
+                console.log('Response JSON:', data);
+    
+                if (data && data[0] && data[0].image_id) {
+                    console.log('if')
+                    imageId = data[0].image_id; // Store the image_id
+                    updateDiaryModal(data);
+                    diaryModal.style.display = 'block';
+                } else {
+                    console.log('else')
+                    console.error('Unexpected response structure:', data);
+                    alert('Unexpected response structure.');
+                }
             } else {
                 console.error('Analysis request failed:', response.statusText);
                 alert('Analysis request failed.');
@@ -356,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Error during analysis request.');
         }
     };
+    
     
     
 

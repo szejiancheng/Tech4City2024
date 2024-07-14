@@ -1,15 +1,48 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
-# from requests_toolbelt.multipart import MultipartEncoder
+import os
 import base64
-
 
 app = Flask(__name__) 
 # CORS(app)
 
-DATABASE = 'backend/database.db'
+DATABASE = os.path.join(os.path.dirname(__file__), 'backend', 'database.db')
 app.config['DATABASE'] = DATABASE
+
+def init_db():
+    if not os.path.exists(os.path.dirname(DATABASE)):
+        os.makedirs(os.path.dirname(DATABASE))
+    if not os.path.exists(DATABASE):
+        connection = sqlite3.connect(DATABASE)
+        cursor = connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Images (
+                image_id INTEGER PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                image_data BLOB NOT NULL,
+                file_path TEXT NOT NULL,
+                content_type TEXT NOT NULL,
+                upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Results (
+                result_id INTEGER PRIMARY KEY,
+                image_id INTEGER NOT NULL,
+                user_id TEXT NOT NULL,
+                label TEXT NOT NULL,
+                confidence_score REAL NOT NULL,
+                result_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                preferred INTEGER DEFAULT 0,
+                FOREIGN KEY (image_id) REFERENCES Images (image_id)
+            )
+        ''')
+        connection.commit()
+        connection.close()
+
+# Initialize the database
+init_db()
 
 # Perform AI processing on the input data
 def perform_ai_processing(data):
@@ -24,35 +57,39 @@ def perform_ai_processing(data):
 def store_in_database(data, result):
     print('Storing data in database...')
 
-    connection = sqlite3.connect(app.config['DATABASE'])
-    cursor = connection.cursor()
+    try:
+        connection = sqlite3.connect(app.config['DATABASE'])
+        cursor = connection.cursor()
 
-    # Extract data
-    user_id, image_data, file_path, content_type = \
-        data['user_id'], data['image_data'], data['file_path'], data['content_type']
+        # Extract data
+        user_id, image_data, file_path, content_type = \
+            data['user_id'], data['image_data'], data['file_path'], data['content_type']
 
-    # Store image data in Images table
-    cursor.execute('''
-        INSERT INTO Images (user_id, image_data, file_path, content_type) VALUES (?, ?, ?, ?)
-    ''', (user_id, image_data, file_path, content_type))
-    connection.commit()
-    image_id = cursor.lastrowid
+        # Store image data in Images table
+        cursor.execute('''
+            INSERT INTO Images (user_id, image_data, file_path, content_type) VALUES (?, ?, ?, ?)
+        ''', (user_id, image_data, file_path, content_type))
+        connection.commit()
+        image_id = cursor.lastrowid
 
-    # Store inference data in Results table
-    rows = []
-    for pred in result:
-        label, confidence_score = pred['label'], pred['confidence_score']
-        rows.append((image_id, user_id, label, confidence_score))
-    cursor.executemany('''
-        INSERT INTO Results (image_id, user_id, label, confidence_score) VALUES (?, ?, ?, ?)
-    ''', rows)
-    connection.commit()
-    result_id = cursor.lastrowid
+        # Store inference data in Results table
+        rows = []
+        for pred in result:
+            label, confidence_score = pred['label'], pred['confidence_score']
+            rows.append((image_id, user_id, label, confidence_score))
+        cursor.executemany('''
+            INSERT INTO Results (image_id, user_id, label, confidence_score) VALUES (?, ?, ?, ?)
+        ''', rows)
+        connection.commit()
+        result_id = cursor.lastrowid
 
-    connection.close()
-    print(f'Image added in database: {image_id} with result: {result_id}')
+        connection.close()
+        print(f'Image added in database: {image_id} with result: {result_id}')
 
-    return image_id, result_id
+        return image_id, result_id
+    except sqlite3.Error as e:
+        print(f'SQLite error: {e}')
+        return None, None
 
 
 # Fetch results from the database
@@ -200,24 +237,24 @@ def get_results(user_id):
 
 @app.route('/analyze', methods=['POST'])
 # POST /analyze: Accepts user input, performs AI processing, stores the input and result in the database, and returns the result.
-def analyze():  
+def analyze():
     print('Analyzing...')
 
     # Check if data is present
     if 'file' not in request.files or 'user_id' not in request.form:
         return jsonify({'error': 'File and user ID are required'}), 400
-    
+
     # Retrieve file and user_id
     file = request.files['file']
     user_id = request.form['user_id']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    
+
     # Perform AI processing on the input data
     result = perform_ai_processing(file)
     if not result:
         return jsonify({'error': 'failed to make inference'}), 400
-    
+
     # Collate data to be stored in the database
     data = {
         'user_id': user_id,
@@ -227,12 +264,10 @@ def analyze():
     }
 
     # Store the input and result in the database
-    ## data = {'user_id': str, 'image_data': binary str}
-    ## result = [list of {'label': str, 'confidence_score': float}]
     image_id, result_id = store_in_database(data, result)
-    if image_id == None or result_id == None:
+    if image_id is None or result_id is None:
         return jsonify({'error': 'failed to add data to database'}), 400
-    
+
     # Generate list of result_obj
     results_lst = fetch_results(user_id, image_id)
 
