@@ -103,7 +103,7 @@ def fetch_results(user_id, image_id=None, selected=False):
         ret_output = []
         if results:
             for result in results:
-                (curr_result_id, curr_user_id, curr_image_id, curr_label, 
+                (curr_result_id, curr_image_id, curr_user_id, curr_label, 
                  curr_confidence_score, curr_result_timestamp, _) = result
                 ret_output.append({
                     'result_id': curr_result_id,
@@ -113,6 +113,7 @@ def fetch_results(user_id, image_id=None, selected=False):
                     'confidence_score': curr_confidence_score,
                     'result_timestamp': curr_result_timestamp
                 })
+        print('ret_output', ret_output)
         return ret_output
 
     except sqlite3.Error as e:
@@ -185,9 +186,8 @@ def get_results(user_id):
 
         
 
-
+        print(results)
         for result in results:
-            print('error is here')
             curr_output = {
                 'image': image_obj_dict[result['image_id']],
                 'result': result

@@ -469,21 +469,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const diaryPreviewImage = document.getElementById('diary-preview-image');
         const diaryEmptyMessage = document.getElementById('diary-empty-message');
         const diaryResultsContainer = document.getElementById('diary-results-container');
+        console.log(result)
         
         // change image
-        diaryPreviewImage.src = result.image_obj.image_data;
+        diaryPreviewImage.src = result.image.image_data;
         diaryPreviewImage.classList.add('has-image');
         diaryEmptyMessage.style.display = 'none';
 
         diaryResultsContainer.innerHTML = '';
 
         const resultTimestamp = document.createElement('p');
-        resultTimestamp.textContent = `Result Timestamp: ${result.result_obj.result_timestamp}`;
+        resultTimestamp.textContent = `Result Timestamp: ${result.result.result_timestamp}`;
         diaryResultsContainer.appendChild(resultTimestamp);
 
         // show the selected choice
         const label = document.createElement('p');
-        label.textContent = `Selected Label: ${result.result_obj.label_name}`;
+        label.textContent = `Selected Label: ${result.result.label_name}`;
         diaryResultsContainer.appendChild(label);
     };
 
