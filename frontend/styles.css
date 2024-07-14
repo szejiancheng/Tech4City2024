@@ -447,6 +447,13 @@ body {
     display: inline-block;
 }
 
+.upload-line {
+    position: fixed;
+    top: 20px;
+    color: white;
+    font-size: smaller;
+}
+
 .username-modal {
     display: none;
     position: fixed;
