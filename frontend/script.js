@@ -313,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Checks the cache to see if there is a username
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
         usernameDisplay.textContent = `welcome, ${storedUsername}`;
@@ -325,22 +326,22 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Username or image not available');
             return;
         }
-
+    
         const formData = new FormData();
         formData.append('user_id', username);
         formData.append('image_data', currentFile);
-
+    
         try {
-            const response = await fetch('https://api.example.com/analyze', {
+            const response = await fetch('http://127.0.0.1:8000/analyze', {
                 method: 'POST',
                 body: formData,
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 console.log('Analysis result:', data);
-                imageId = data.image_obj.image_id; 
-                updateDiaryModal(data);
+                imageId = data.image_obj.image_id; // Store the image_id
+                updateDiaryModal(data.results);
                 diaryModal.style.display = 'block';
             } else {
                 console.error('Analysis request failed:', response.statusText);
@@ -351,6 +352,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Error during analysis request.');
         }
     };
+    
 
     // Fetch diary results (GET)
     const fetchDiaryResults = async () => {
@@ -359,10 +361,10 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Username not available');
             return;
         }
-
+    
         try {
-            const response = await fetch(`https://api.example.com/results?user_id=${username}`);
-
+            const response = await fetch(`http://127.0.0.1:8000/results/${username}`);
+    
             if (response.ok) {
                 const data = await response.json();
                 diaryResults = data;
@@ -383,6 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
             displayEmptyDiary();
         }
     };
+    
 
     const displayEmptyDiary = () => {
         const diaryPreviewImage = document.getElementById('diary-preview-image');
@@ -400,7 +403,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const diaryPreviewImage = document.getElementById('diary-preview-image');
         const diaryEmptyMessage = document.getElementById('diary-empty-message');
         const diaryResultsContainer = document.getElementById('diary-results-container');
-        const { image_obj, results_obj } = results;
 
         // Update preview image
         diaryPreviewImage.src = URL.createObjectURL(currentFile);
@@ -412,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Append result timestamp
         const resultTimestamp = document.createElement('p');
-        resultTimestamp.textContent = `Result Timestamp: ${results_obj[0].result_timestamp}`;
+        resultTimestamp.textContent = `Result Timestamp: ${results[0].result_timestamp}`;
         diaryResultsContainer.appendChild(resultTimestamp);
 
         // Create table for results
@@ -426,12 +428,12 @@ document.addEventListener('DOMContentLoaded', function () {
         headerRow.appendChild(confidenceHeader);
         table.appendChild(headerRow);
 
-        results_obj.forEach(result => {
+        results.forEach(result => {
             const row = document.createElement('tr');
             row.addEventListener('click', () => selectLabel(result.result_id));
 
             const classificationCell = document.createElement('td');
-            classificationCell.textContent = result.classification_result;
+            classificationCell.textContent = result.label_name;
             const confidenceCell = document.createElement('td');
             confidenceCell.textContent = result.confidence_score.toFixed(2);
 
@@ -448,52 +450,49 @@ document.addEventListener('DOMContentLoaded', function () {
         const diaryEmptyMessage = document.getElementById('diary-empty-message');
         const diaryResultsContainer = document.getElementById('diary-results-container');
         
-        // Update preview image
-        diaryPreviewImage.src = result.image_data;
+        // change image
+        diaryPreviewImage.src = result.image_obj.image_data;
         diaryPreviewImage.classList.add('has-image');
         diaryEmptyMessage.style.display = 'none';
 
-        // Clear previous results
         diaryResultsContainer.innerHTML = '';
 
-        // Append result timestamp
         const resultTimestamp = document.createElement('p');
-        resultTimestamp.textContent = `Result Timestamp: ${result.result_timestamp}`;
+        resultTimestamp.textContent = `Result Timestamp: ${result.result_obj.result_timestamp}`;
         diaryResultsContainer.appendChild(resultTimestamp);
 
-        // Display selected label
+        // show the selected choice
         const label = document.createElement('p');
-        label.textContent = `Selected Label: ${result.classification_result}`;
+        label.textContent = `Selected Label: ${result.result_obj.label_name}`;
         diaryResultsContainer.appendChild(label);
     };
 
-    // API Request for select label (POST)
     const selectLabel = async (resultId) => {
         const username = localStorage.getItem('username');
         if (!username || !imageId || !resultId) {
             alert('Missing data to select label');
             return;
         }
-
+    
         const payload = {
             user_id: username,
             image_id: imageId,
             result_id: resultId
         };
-
+    
         try {
-            const response = await fetch('https://api.example.com/select', {
+            const response = await fetch('http://127.0.0.1:8000/select', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload),
             });
-
+    
             if (response.ok) {
                 console.log('Label selected successfully');
                 alert('Label selected successfully');
-                await fetchDiaryResults(); // calls refresh diary after selecting label
+                await fetchDiaryResults(); // Refresh diary results after selecting a label
             } else {
                 console.error('Label selection failed:', response.statusText);
                 alert('Label selection failed.');
@@ -503,4 +502,5 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Error during label selection.');
         }
     };
+    
 });
