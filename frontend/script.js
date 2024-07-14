@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let audioInitialized = false;
   let isMusicPlaying = true;
   let currentFile;
-  let imageId; // Store the image_id from the backend
+  let imageId; 
   let diaryResults = [];
   let currentDiaryIndex = 0;
 
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Checks the cache to see if there is a username
+  // checks cache for existing user
   const storedUsername = localStorage.getItem("username");
   if (storedUsername) {
     usernameDisplay.textContent = `welcome, ${storedUsername}`;
@@ -352,29 +352,29 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Username or image not available");
       return;
     }
-
-    // Create a FormData object
+  
     const formData = new FormData();
     formData.append("user_id", username);
     formData.append("file", currentFile);
-
+  
     try {
       const response = await fetch("http://127.0.0.1:8000/analyze", {
         method: "POST",
         body: formData,
-        // mode: 'no-cors'  // Setting the mode to 'no-cors'
+        // mode: 'no-cors'
       });
       console.log("Response received:", response);
-
+  
       if (response.ok) {
         const data = await response.json();
         console.log("Response JSON:", data);
-
+  
         if (data && data[0] && data[0].image_id) {
           console.log("if");
-          imageId = data[0].image_id; // Store the image_id
+          imageId = data[0].image_id; 
           updateDiaryModal(data);
-          diaryModal.style.display = "block";
+          modal.style.display = "none";
+          diaryModal.style.display = "block"; 
         } else {
           console.log("else");
           console.error("Unexpected response structure:", data);
@@ -389,6 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Error during analysis request.");
     }
   };
+  
 
   // Fetch diary results (GET)
   const fetchDiaryResults = async () => {
@@ -444,28 +445,28 @@ document.addEventListener("DOMContentLoaded", function () {
     diaryResultsContainer.innerHTML = "";
   };
 
-  // Edit the diary modal with the analyze results
+  // edit the diary modal with the api results
   const updateDiaryModal = (results) => {
     const diaryPreviewImage = document.getElementById("diary-preview-image");
     const diaryEmptyMessage = document.getElementById("diary-empty-message");
-    const diaryResultsContainer = document.getElementById(
-      "diary-results-container"
-    );
-
-    // Update preview image
+    const diaryResultsContainer = document.getElementById("diary-results-container");
+  
     diaryPreviewImage.src = URL.createObjectURL(currentFile);
     diaryPreviewImage.classList.add("has-image");
     diaryEmptyMessage.style.display = "none";
-
-    // Clear previous results
+  
     diaryResultsContainer.innerHTML = "";
-
-    // Append result timestamp
+  
+    // timestamp (GMT+8)
     const resultTimestamp = document.createElement("p");
-    resultTimestamp.textContent = `Result Timestamp: ${results[0].result_timestamp}`;
+    const timestamp = new Date(results[0].result_timestamp);
+    const gmtPlus8Offset = 8 * 60; 
+    const localTime = new Date(timestamp.getTime() + gmtPlus8Offset * 60 * 1000);
+    const localTimeString = localTime.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' });
+    resultTimestamp.textContent = `${localTimeString}`;
     diaryResultsContainer.appendChild(resultTimestamp);
-
-    // Create table for results
+  
+    // results table (labels)
     const table = document.createElement("table");
     const headerRow = document.createElement("tr");
     const classificationHeader = document.createElement("th");
@@ -475,49 +476,56 @@ document.addEventListener("DOMContentLoaded", function () {
     headerRow.appendChild(classificationHeader);
     headerRow.appendChild(confidenceHeader);
     table.appendChild(headerRow);
-
+  
     results.forEach((result) => {
       const row = document.createElement("tr");
       row.addEventListener("click", () => selectLabel(result.result_id));
-
+  
       const classificationCell = document.createElement("td");
-      classificationCell.textContent = result.label_name;
+      classificationCell.textContent = result.label_name.replace(/_/g, ' '); // parsing label names
       const confidenceCell = document.createElement("td");
       confidenceCell.textContent = result.confidence_score.toFixed(2);
-
+  
       row.appendChild(classificationCell);
       row.appendChild(confidenceCell);
       table.appendChild(row);
     });
-
+  
     diaryResultsContainer.appendChild(table);
   };
+  
+  
+  
+  
 
   const displayDiaryResult = (result) => {
     const diaryPreviewImage = document.getElementById("diary-preview-image");
     const diaryEmptyMessage = document.getElementById("diary-empty-message");
-    const diaryResultsContainer = document.getElementById(
-      "diary-results-container"
-    );
+    const diaryResultsContainer = document.getElementById("diary-results-container");
     console.log("displayDiaryResult", result);
-
-    // change image
-    const contentType = 'image/png'; // Example content type
-
-    diaryPreviewImage.src = `data:${contentType};base64,${result.image.image_data}`;;
+  
+    const contentType = 'image/png';
+  
+    diaryPreviewImage.src = `data:${contentType};base64,${result.image.image_data}`;
     diaryPreviewImage.classList.add("has-image");
     diaryEmptyMessage.style.display = "none";
-
+  
     diaryResultsContainer.innerHTML = "";
-
-    const resultTimestamp = document.createElement("p");
-    resultTimestamp.textContent = `Result Timestamp: ${result.result.result_timestamp}`;
-    diaryResultsContainer.appendChild(resultTimestamp);
-
-    // show the selected choice
+  
+    // show the selected label
     const label = document.createElement("p");
-    label.textContent = `Selected Label: ${result.result.label_name}`;
+    label.textContent = result.result.label_name.replace(/_/g, ' ');
+    label.style.fontSize = '24px'; 
+    label.style.fontWeight = 'bold'; 
     diaryResultsContainer.appendChild(label);
+  
+    const resultTimestamp = document.createElement("p");
+    const timestamp = new Date(result.result.result_timestamp);
+    const gmtPlus8Offset = 8 * 60; 
+    const localTime = new Date(timestamp.getTime() + gmtPlus8Offset * 60 * 1000);
+    const localTimeString = localTime.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' });
+    resultTimestamp.textContent = `${localTimeString}`;
+    diaryResultsContainer.appendChild(resultTimestamp);
   };
 
   const selectLabel = async (resultId) => {
@@ -544,8 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (response.ok) {
         console.log("Label selected successfully");
-        alert("Label selected successfully");
-        await fetchDiaryResults(); // Refresh diary results after selecting a label
+        await fetchDiaryResults(); // refreshes diary modal after selecting a label
       } else {
         console.error("Label selection failed:", response.statusText);
         alert("Label selection failed.");
@@ -555,4 +562,15 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Error during label selection.");
     }
   };
+  
+  const updateClock = () => {
+    const clockElement = document.getElementById("live-clock");
+    const now = new Date();
+    const options = { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const timeString = now.toLocaleTimeString('en-US', options);
+    clockElement.textContent = timeString;
+};
+
+    setInterval(updateClock, 1000);
+    updateClock();
 });
