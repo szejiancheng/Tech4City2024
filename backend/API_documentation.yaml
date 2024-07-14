@@ -2,11 +2,9 @@ openapi: 3.0.3
 info:
   title: Tech4City Entry Coding Challenge - Cloud Control
   version: 1.0.0
-servers:
-  - url: "https://api.example.com"
-    description: "placeholder"
-  - url: "https://api.example.com"
-    description: "placeholder 2"
+servers: 
+  - url: 'http://127.0.0.1:8000'
+    description: 'localhost 8000'
 paths:
   /results/{user_id}:
     get:
@@ -20,74 +18,85 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200': 
           description: Successfully retrieved user's results
-          content:
+          content: 
+          # List of {image, result} objects
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Result"
-        "400":
-          description: Invalid ID / No results found
+                  type: object
+                  properties:
+                    image:
+                      type: object
+                        $ref: '#/components/schemas/Image'
+                    result:
+                      type: object
+                        $ref: '#/components/schemas/Result'
+        '400':
+          description: Invalid ID
   /analyze:
     post:
-      summary: Running inference with model
-      requestBody:
+      summary: Accept image, run inference, add to database
+      requestBody: 
         description: Image to be classified along with user ID
         required: true
-        content:
+        content: 
           multipart/form-data:
             schema:
               type: object
-              $ref: "#/components/schemas/AnalyzeRequest"
+              $ref: '#/components/schemas/AnalyzeRequest'      
       responses:
-        "200":
-          description: Successful inference
+        '200': 
+          description: Successful inference and storage
           content:
-            multipart/form-data:
+          # List of results
+            application/json:
               schema:
-                type: object
-                properties:
-                  image:
-                    type: array
-                    $ref: "#/components/schemas/Image"
-                  results:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Result"
-        "400":
+                type: array
+                items:
+                  $ref: '#/components/schemas/Result'
+        '400':
           description: Error with payload or model
   /select:
     post:
       summary: Selecting correct classification
-      requestBody:
+      requestBody: 
         description: Result preferred by user
         required: true
-        content:
+        content: 
           application/json:
             schema:
-              $ref: "#/components/schemas/PreferredResult"
+              $ref: '#/components/schemas/PreferredResult'
       responses:
-        "200":
+        '200': 
           description: Successful inference
-        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
           description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
 
 components:
   schemas:
     Image:
       type: object
       properties:
-        image_id:
+        image_id: 
           type: integer
           format: int64
         user_id:
           type: string
-        image_data:
+        image_data: 
           type: string
           format: binary
-        upload_date:
+        upload_date: 
           type: string
           format: date-time
     AnalyzeRequest:
@@ -98,9 +107,6 @@ components:
         image_data:
           type: string
           format: binary
-        image_id:
-          type: integer
-          format: int64
     Result:
       type: object
       properties:
@@ -109,14 +115,15 @@ components:
           format: int64
         user_id:
           type: str
-        image_obj:
-          $ref: "#/components/schemas/Image"
+        image_id:
+          type: integer
+          format: int64
         label_name:
           type: string
         confidence_score:
           type: number
           format: float
-        result_timestamp:
+        result_timestamp: 
           type: string
           format: date-time
     PreferredResult:
@@ -138,3 +145,4 @@ components:
         code:
           type: integer
           format: int64
+
