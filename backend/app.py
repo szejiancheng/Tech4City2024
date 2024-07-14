@@ -1,8 +1,11 @@
+import io
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
 import os
 import base64
+from model import infer
+from PIL import Image
 
 app = Flask(__name__)
 CORS(app)
@@ -46,8 +49,10 @@ init_db()
 
 def perform_ai_processing(data):
     print('Performing AI inference...')
-    return [{'label': 'fish', 'confidence_score': '0.876'},
-            {'label': 'chicken', 'confidence_score': '0.543'}]
+    image_stream = io.BytesIO(data.read())
+    image = Image.open(image_stream).convert('RGB')
+    data.seek(0)  # Reset the cursor to the start of the file
+    return infer(image)
 
 def store_in_database(data, result):
     print('Storing data in database...')
