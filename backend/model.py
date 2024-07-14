@@ -3,8 +3,8 @@ from transformers import AutoModelForImageClassification
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 
-processor = AutoImageProcessor.from_pretrained("./backend/")
-model = AutoModelForImageClassification.from_pretrained("./backend/")
+processor = AutoImageProcessor.from_pretrained("nateraw/food")
+model = AutoModelForImageClassification.from_pretrained("nateraw/food")
 
 def infer(image):
     inputs = processor(image, return_tensors="pt")
