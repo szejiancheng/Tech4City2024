@@ -1,6 +1,6 @@
 # Cloud Control Tech4City 2024 Entry Coding Challenge Documentation
 
-Thank you for considering Cloud Control for the Tech4City coding challenge! This documentation is meant to serve as a guide to explaining and running the **Nomsters** webapp, the AI powered food diary.
+Thank you for considering Cloud Control for the Tech4City coding challenge! This documentation is meant to serve as a guide to explaining and running the **Nomsters** webapp, the AI powered food diary. The submission can be seen in this pull request [here](https://github.com/ej-hw/Tech4City2024/pull/14)
 
 ## Overview
 When users upload pictures of food, the web app will return the name of the food item in the photo. The web app is a simple to use tool that conducts image classification using AI to determine food items in a photo.
