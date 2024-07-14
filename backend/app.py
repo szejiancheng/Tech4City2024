@@ -10,7 +10,7 @@ from PIL import Image
 app = Flask(__name__)
 CORS(app)
 
-DATABASE = os.path.join(os.path.dirname(__file__), 'backend', 'database.db')
+DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
 app.config['DATABASE'] = DATABASE
 
 def init_db():
@@ -175,6 +175,16 @@ def check_user(user_id):
     except sqlite3.Error as e:
         print(f'SQLite error: {e}')
         return False
+    
+
+# GET /results: Retrieves all stored inputs and their results from the database.
+@app.route('/results', methods=['GET'])
+def placeholder():
+    ret_output = {
+        'message': 'Use "/results/<user_id>" instead to retrieve your data.'
+    }
+
+    return jsonify(ret_output), 200
 
 @app.route('/results/<user_id>', methods=['GET'])
 def get_results(user_id):
