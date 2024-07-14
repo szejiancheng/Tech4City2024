@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('http://127.0.0.1:8000/analyze', {
                 method: 'POST',
                 body: formData,
-                mode: 'no-cors'  // Setting the mode to 'no-cors'
+                // mode: 'no-cors'  // Setting the mode to 'no-cors'
             });
             console.log('Response received:', response);
     
@@ -376,7 +376,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     
         try {
-            const response = await fetch(`http://127.0.0.1:8000/results/${username}`);
+            const response = await fetch(`http://127.0.0.1:8000/results/${username}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log(response)
     
             if (response.ok) {
                 const data = await response.json();
@@ -398,6 +404,7 @@ document.addEventListener('DOMContentLoaded', function () {
             displayEmptyDiary();
         }
     };
+    
     
 
     const displayEmptyDiary = () => {
