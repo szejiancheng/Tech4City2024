@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let imageId; 
   let diaryResults = [];
   let currentDiaryIndex = 0;
+  const apiURL = 'http://127.0.0.1:8000';
 
   const backgrounds = [
     { img: "assets/backgrounds/beach.png", music: "assets/music/beach.wav" },
@@ -358,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("file", currentFile);
   
     try {
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
+      const response = await fetch(apiURL+"/analyze", {
         method: "POST",
         body: formData,
         // mode: 'no-cors'
@@ -401,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/results/${username}`,
+        apiURL+`/results/${username}`,
         {
           method: "GET",
           headers: {
@@ -542,7 +543,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/select", {
+      const response = await fetch(apiURL+"/select", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
