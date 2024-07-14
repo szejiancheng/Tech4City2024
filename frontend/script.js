@@ -327,21 +327,25 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
     
+        // Create a FormData object
         const formData = new FormData();
         formData.append('user_id', username);
-        formData.append('image_data', currentFile);
+        formData.append('file', currentFile);
     
         try {
             const response = await fetch('http://127.0.0.1:8000/analyze', {
                 method: 'POST',
                 body: formData,
+                mode: 'no-cors'  // Setting the mode to 'no-cors'
             });
+            console.log('response sent?')
     
-            if (response.ok) {
+            if (response && response.ok) {
+                console.log ('response is ok')
                 const data = await response.json();
                 console.log('Analysis result:', data);
-                imageId = data.image_obj.image_id; // Store the image_id
-                updateDiaryModal(data.results);
+                imageId = data[0].image_id; // Store the image_id
+                updateDiaryModal(data);
                 diaryModal.style.display = 'block';
             } else {
                 console.error('Analysis request failed:', response.statusText);
@@ -352,6 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Error during analysis request.');
         }
     };
+    
     
 
     // Fetch diary results (GET)

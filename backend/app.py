@@ -6,7 +6,7 @@ import base64
 
 
 app = Flask(__name__) 
-CORS(app)
+# CORS(app)
 
 DATABASE = 'backend/database.db'
 app.config['DATABASE'] = DATABASE
