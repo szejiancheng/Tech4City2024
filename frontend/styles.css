@@ -1,0 +1,576 @@
+@font-face {
+    font-family: 'eightbit';
+    src: url('assets/fonts/8bitfont.otf') format('opentype');
+}
+
+body {
+    margin: 0;
+    font-family: 'eightbit', sans-serif;
+    height: 100vh;
+    width: 100vw;
+    background-color: black;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+}
+
+.background-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+}
+
+.fade-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 1s ease, opacity 1s ease;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.diary-button {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    width: 100px;
+    height: 100px;
+    z-index: 2;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.diary-icon {
+    width: 100%;
+    height: 100%;
+}
+
+.diary-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.diary-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.diary-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    border: 2px dashed #aaa;
+    padding: 20px;
+    position: relative;
+    background-color: #f0f0f0;
+    overflow: hidden;
+}
+
+.diary-preview-image {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    filter: grayscale(100%);
+}
+
+.diary-preview-image.has-image {
+    filter: none;
+}
+
+.diary-empty-message {
+    color: #aaa;
+    font-size: 18px;
+    margin-top: 10px;
+    font-family: 'eightbit';
+}
+
+#diary-results-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+#diary-results-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#diary-results-container th, #diary-results-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#diary-results-container th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+#diary-results-container tr:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+#diary-results-container p {
+    font-family: 'eightbit';
+    margin: 10px 0;
+  }
+
+  #diary-results-container p:first-child {
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  #diary-results-container p:nth-child(2) {
+    font-size: 16px;
+  }
+
+.diary-navigation {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.diary-nav-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.diary-nav-button img {
+    width: 50px;
+    height: 50px;
+}
+
+.username-display-container {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 2;
+}
+
+.username-display {
+    font-size: 24px;
+    color: white;
+    font-family: 'eightbit';
+    margin-bottom: 10px;
+}
+
+.change-user-button {
+    width: 200px;
+    border-radius: 20px;
+    background-color: white;
+    border: none;
+    padding: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    font-family: 'eightbit';
+}
+
+.music-button-container {
+    position: absolute;
+    top: 120px;
+    right: 20px;
+    width: 100px;
+    height: 100px;
+    z-index: 2;
+}
+
+.music-icon {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.content {
+    position: absolute;
+    bottom: 100px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.pet {
+    width: 400px;
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+.button {
+    background-color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 25px;
+    width: 300px;
+    font-size: 30px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    font-family: 'eightbit';
+}
+
+.background-controls {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    gap: 20px;
+    z-index: 2;
+}
+
+.background-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.background-button img {
+    width: 50px;
+    height: 50px;
+}
+
+.rotated-180 {
+    transform: rotate(180deg);
+}
+
+.play-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.play-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.play-button-img {
+    width: 200px;
+    height: 200px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.diary-close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+#file-input {
+    display: none;
+}
+
+#preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    border: 2px dashed #007bff;
+    padding: 20px;
+    position: relative;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+.drag-and-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    text-align: center;
+}
+
+.preview-image {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 4px;
+    padding: 5px;
+    filter: grayscale(100%);
+}
+
+.preview-image.has-image {
+    filter: none;
+}
+
+#preview-container.dragging {
+    border-color: #ff0000;
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+#preview-container label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+#preview-container .analyse-button,
+#preview-container .clear-button {
+    display: none;
+    position: absolute;
+    padding: 6px 12px;
+    font-family: 'eightbit';
+    font-size: 40px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+#preview-container .analyse-button {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: green;
+    color: white;
+}
+
+#preview-container .clear-button {
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: red;
+    color: white;
+    font-size: 16px;
+    background-color: #c22317;
+}
+
+#preview-container:hover .preview-image.has-image {
+    filter: grayscale(50%);
+}
+
+#preview-container:hover .analyse-button,
+#preview-container:hover .clear-button {
+    display: inline-block;
+}
+
+.upload-line {
+    position: fixed;
+    top: 20px;
+    color: white;
+    font-size: smaller;
+    font-family: 'eightbit', sans-serif;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.username-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.username-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.username-button {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.username-input {
+    font-family: 'eightbit';
+    font-size: 40px;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+.submit-button {
+    background-color: #007bff;
+    border: none;
+    padding: 20px;
+    border-radius: 25px;
+    width: 200px;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    font-family: 'eightbit';
+    display: none;
+    margin: 0 auto;
+}
+
+.live-clock {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-family: 'eightbit', sans-serif;
+    font-size: 20px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.version-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-family: 'eightbit', sans-serif;
+    font-size: 20px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
